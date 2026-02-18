@@ -1,0 +1,17 @@
+node_modules/
+dist/
+docs/*.png
+docs/*.svg
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+.idea/
+*.swp
+*.swo
+
+.DS_Store

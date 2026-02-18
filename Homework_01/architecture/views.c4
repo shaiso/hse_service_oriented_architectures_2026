@@ -1,0 +1,43 @@
+views {
+
+  // Вариант B (выбранный): Микросервисная архитектура
+
+  view container_microservices of marketplace {
+    title 'Маркетплейс — Container Diagram (Микросервисы)'
+    description 'Выбранный вариант: каждый домен — отдельный сервис со своей БД'
+
+    include *
+    include buyer
+    include seller
+    include emailProvider
+    include paymentGateway
+  }
+
+  // Вариант A: Модульный монолит (альтернатива)
+
+  view container_monolith of monolith {
+    title 'Маркетплейс — Container Diagram (Модульный монолит)'
+    description 'Альтернативный вариант: единое приложение с модулями по доменам, общая БД с разными схемами'
+
+    include *
+    include monolith.app.*
+    include buyer
+    include seller
+    include emailProvider
+    include paymentGateway
+  }
+
+  // Общий System Context
+
+  view context_overview {
+    title 'Маркетплейс — System Context'
+    description 'Общий контекст системы: актёры и внешние зависимости'
+
+    include buyer
+    include seller
+    include marketplace
+    include emailProvider
+    include paymentGateway
+  }
+
+}

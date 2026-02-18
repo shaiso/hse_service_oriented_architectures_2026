@@ -1,0 +1,50 @@
+specification {
+
+  element actor {
+    style {
+      shape person
+      color amber
+    }
+  }
+
+  element system {
+    style {
+      color indigo
+    }
+  }
+
+  element container {
+    style {
+      color blue
+    }
+  }
+
+  element database {
+    style {
+      shape storage
+      color slate
+    }
+  }
+
+  element queue {
+    style {
+      shape queue
+      color green
+    }
+  }
+
+  element module {
+    style {
+      shape rectangle
+      color sky
+    }
+  }
+
+  element external {
+    style {
+      color gray
+      shape browser
+    }
+  }
+
+}

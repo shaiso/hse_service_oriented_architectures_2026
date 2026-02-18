@@ -1,0 +1,12 @@
+{
+  "name": "hse-service-oriented-architectures",
+  "private": true,
+  "scripts": {
+    "dev": "likec4 serve",
+    "build": "likec4 build -o dist/",
+    "export": "likec4 export png -o docs/"
+  },
+  "devDependencies": {
+    "likec4": "^1"
+  }
+}

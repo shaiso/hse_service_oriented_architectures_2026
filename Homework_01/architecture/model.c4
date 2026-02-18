@@ -1,0 +1,220 @@
+model {
+
+  buyer = actor 'Покупатель' {
+    description 'Пользователь, который просматривает товары и оформляет заказы'
+  }
+
+  seller = actor 'Продавец' {
+    description 'Пользователь, который управляет товарами и обрабатывает заказы'
+  }
+
+  marketplace = system 'Маркетплейс' {
+    description 'Платформа для покупки и продажи товаров'
+
+    apiGateway = container 'API Gateway' {
+      description 'Единая точка входа, маршрутизация запросов, аутентификация'
+      technology 'Go / REST'
+    }
+
+    userService = container 'User Service' {
+      description 'Регистрация, аутентификация, управление профилями покупателей и продавцов'
+      technology 'Go / REST'
+    }
+
+    userDb = database 'User DB' {
+      description 'Данные пользователей: профили, учётные записи, роли'
+      technology 'PostgreSQL'
+    }
+
+    catalogService = container 'Catalog Service' {
+      description 'Управление товарным каталогом: создание, редактирование, удаление товаров, категории'
+      technology 'Go / REST'
+    }
+
+    catalogDb = database 'Catalog DB' {
+      description 'Товары, категории, описания, цены, остатки'
+      technology 'PostgreSQL'
+    }
+
+    orderService = container 'Order Service' {
+      description 'Оформление заказов, отслеживание статусов, история заказов'
+      technology 'Go / REST'
+    }
+
+    orderDb = database 'Order DB' {
+      description 'Заказы, позиции заказов, статусы'
+      technology 'PostgreSQL'
+    }
+
+    paymentService = container 'Payment Service' {
+      description 'Расчёт стоимости, проведение платежей, учёт транзакций'
+      technology 'Go / REST'
+    }
+
+    paymentDb = database 'Payment DB' {
+      description 'Транзакции, платежи, баланс продавцов'
+      technology 'PostgreSQL'
+    }
+
+    notificationService = container 'Notification Service' {
+      description 'Отправка уведомлений о статусах заказов (email, push)'
+      technology 'Go'
+    }
+
+    feedService = container 'Feed Service' {
+      description 'Формирование персонализированной ленты товаров на основе истории просмотров и покупок'
+      technology 'Go / REST'
+    }
+
+    feedCache = database 'Feed Cache' {
+      description 'Кеш персонализированных рекомендаций'
+      technology 'Redis'
+    }
+
+    messageBroker = queue 'Message Broker' {
+      description 'Асинхронный обмен событиями между сервисами'
+      technology 'Kafka'
+    }
+  }
+
+  emailProvider = external 'Email Provider' {
+    description 'Внешний сервис отправки email-уведомлений'
+  }
+
+  paymentGateway = external 'Payment Gateway' {
+    description 'Внешний платёжный шлюз'
+  }
+
+  // Актёры → API Gateway
+  buyer -> marketplace.apiGateway 'Просматривает товары, оформляет заказы'
+  seller -> marketplace.apiGateway 'Управляет товарами, обрабатывает заказы'
+
+  // API Gateway → Сервисы (синхронно, REST)
+  marketplace.apiGateway -> marketplace.userService 'Аутентификация, профили' {
+    technology 'REST'
+  }
+  marketplace.apiGateway -> marketplace.catalogService 'CRUD товаров, поиск' {
+    technology 'REST'
+  }
+  marketplace.apiGateway -> marketplace.orderService 'Создание и отслеживание заказов' {
+    technology 'REST'
+  }
+  marketplace.apiGateway -> marketplace.feedService 'Персонализированная лента' {
+    technology 'REST'
+  }
+
+  // Сервисы → БД
+  marketplace.userService -> marketplace.userDb 'Читает/записывает данные пользователей' {
+    technology 'SQL'
+  }
+  marketplace.catalogService -> marketplace.catalogDb 'Читает/записывает товары' {
+    technology 'SQL'
+  }
+  marketplace.orderService -> marketplace.orderDb 'Читает/записывает заказы' {
+    technology 'SQL'
+  }
+  marketplace.paymentService -> marketplace.paymentDb 'Читает/записывает транзакции' {
+    technology 'SQL'
+  }
+  marketplace.feedService -> marketplace.feedCache 'Кеширует рекомендации' {
+    technology 'Redis Protocol'
+  }
+
+  // Синхронные связи между сервисами
+  marketplace.orderService -> marketplace.catalogService 'Проверяет наличие товара' {
+    technology 'REST'
+  }
+  marketplace.orderService -> marketplace.paymentService 'Инициирует оплату' {
+    technology 'REST'
+  }
+
+  // Асинхронные связи через Message Broker
+  marketplace.orderService -> marketplace.messageBroker 'Публикует события заказов' {
+    technology 'Kafka'
+  }
+  marketplace.catalogService -> marketplace.messageBroker 'Публикует обновления каталога' {
+    technology 'Kafka'
+  }
+  marketplace.messageBroker -> marketplace.notificationService 'Доставляет события для уведомлений' {
+    technology 'Kafka'
+  }
+  marketplace.messageBroker -> marketplace.feedService 'Доставляет данные для персонализации' {
+    technology 'Kafka'
+  }
+
+  // Внешние системы
+  marketplace.notificationService -> emailProvider 'Отправляет email-уведомления' {
+    technology 'SMTP'
+  }
+  marketplace.paymentService -> paymentGateway 'Проводит платежи' {
+    technology 'REST'
+  }
+
+  // Вариант A: Модульный монолит (альтернативная декомпозиция)
+
+
+  monolith = system 'Маркетплейс (Модульный монолит)' {
+    description 'Альтернативный вариант: единое приложение, разделённое на модули по доменам'
+
+    app = container 'Marketplace App' {
+      description 'Монолитное приложение с чёткими границами между модулями'
+      technology 'Go / REST'
+
+      usersModule = module 'Users Module' {
+        description 'Регистрация, аутентификация, профили покупателей и продавцов'
+      }
+
+      catalogModule = module 'Catalog Module' {
+        description 'Управление товарами, категориями, поиск и фильтрация'
+      }
+
+      ordersModule = module 'Orders Module' {
+        description 'Оформление заказов, жизненный цикл заказа, история'
+      }
+
+      paymentsModule = module 'Payments Module' {
+        description 'Расчёт стоимости, проведение платежей, учёт транзакций'
+      }
+
+      notificationsModule = module 'Notifications Module' {
+        description 'Отправка уведомлений о статусах заказов (email, push)'
+      }
+
+      feedModule = module 'Feed Module' {
+        description 'Персонализированная лента товаров на основе истории просмотров и покупок'
+      }
+
+      // Взаимодействия между модулями (in-process)
+      ordersModule -> catalogModule 'Проверяет наличие товара'
+      ordersModule -> paymentsModule 'Инициирует оплату'
+      ordersModule -> notificationsModule 'Запрашивает уведомление'
+      catalogModule -> feedModule 'Обновляет данные для персонализации'
+    }
+
+    monolithDb = database 'Marketplace DB' {
+      description 'Единая БД с отдельными схемами: users, catalog, orders, payments, feed'
+      technology 'PostgreSQL'
+    }
+
+    monolithCache = database 'Feed Cache' {
+      description 'Кеш персонализированных рекомендаций'
+      technology 'Redis'
+    }
+  }
+
+  buyer -> monolith.app 'Просматривает товары, оформляет заказы'
+  seller -> monolith.app 'Управляет товарами, обрабатывает заказы'
+
+  monolith.app -> monolith.monolithDb 'Читает/записывает данные всех модулей' {
+    technology 'SQL'
+  }
+  monolith.app -> monolith.monolithCache 'Кеширует рекомендации' {
+    technology 'Redis Protocol'
+  }
+  monolith.app -> emailProvider 'Отправляет email-уведомления' {
+    technology 'SMTP'
+  }
+  monolith.app -> paymentGateway 'Проводит платежи' {
+    technology 'REST'
+  }
+}
