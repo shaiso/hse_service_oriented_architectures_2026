@@ -44,7 +44,7 @@ npm run export
 
 | Сервис | Домен | Обоснование выделения |
 |---|---|---|
-| **User Service** | User Management | Данные пользователей критичны для безопасности; независимый цикл разработки аутентификации |
+| **User Service** | User Management | Данные пользователей критичны для безопасности |
 | **Catalog Service** | Product Catalog | Самый высоконагруженный на чтение — нуждается в независимом масштабировании |
 | **Order Service** | Order Management | Центральный бизнес-процесс с собственным жизненным циклом; требует транзакционной целостности |
 | **Payment Service** | Payment | Работа с финансами требует изоляции, отдельного аудита и повышенной безопасности |
@@ -118,9 +118,6 @@ npm run export
               → [Order Service]   → [Order DB]
               → [Payment Service] → [Payment DB]
               → [Feed Service]    → [Feed Cache]
-
-[Message Broker] ← Order Service, Catalog Service
-                 → Notification Service, Feed Service
 ```
 
 ---
