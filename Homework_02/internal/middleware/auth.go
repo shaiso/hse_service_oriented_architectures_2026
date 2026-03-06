@@ -31,12 +31,6 @@ func Auth(authService *service.AuthService, publicPaths []string) func(http.Hand
 				}
 			}
 
-			// GET /products и GET /products/{id} доступны без авторизации для чтения
-			if r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/products") {
-				next.ServeHTTP(w, r)
-				return
-			}
-
 			// Извлекаем токен из заголовка Authorization
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {

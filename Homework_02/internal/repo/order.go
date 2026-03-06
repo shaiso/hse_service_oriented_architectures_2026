@@ -17,12 +17,10 @@ func NewOrderRepo(pool *pgxpool.Pool) *OrderRepo {
 	return &OrderRepo{pool: pool}
 }
 
-// Pool возвращает пул соединений для начала транзакций в service.
 func (o *OrderRepo) Pool() *pgxpool.Pool {
 	return o.pool
 }
 
-// Create вставляет заказ и его позиции, используя переданное соединение (tx).
 func (o *OrderRepo) Create(ctx context.Context, db DBTX, order *model.Order, items []model.OrderItem) error {
 	orderQuery := `
 		INSERT INTO orders (user_id, status, promo_code_id, total_amount, discount_amount)

@@ -18,7 +18,7 @@ type logEntry struct {
 	Endpoint    string      `json:"endpoint"`
 	StatusCode  int         `json:"status_code"`
 	DurationMs  int64       `json:"duration_ms"`
-	UserID      *string     `json:"user_id"`
+	UserID      *string     `json:"user_id"` // может быть null (запрос без авторизации)
 	Timestamp   string      `json:"timestamp"`
 	RequestBody interface{} `json:"request_body,omitempty"`
 }

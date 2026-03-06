@@ -279,6 +279,8 @@ paths:
     get:
       summary: Получить список товаров с пагинацией и фильтрацией
       tags: [Товары]
+      security:
+        - BearerAuth: [ ]
       parameters:
         - name: page
           in: query
